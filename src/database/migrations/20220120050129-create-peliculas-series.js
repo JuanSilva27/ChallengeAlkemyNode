@@ -9,19 +9,28 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       imagen: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(45),
+        allowNull:false
       },
       titulo: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(45),
+        allowNull:false
       },
       fecha: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        allowNull:false
       },
       calificacion: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull:false
       },
       id_genero: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull:false,
+        references:{
+          model:"Generos",
+          key:"id"
+        }
       },
       createdAt: {
         allowNull: false,
