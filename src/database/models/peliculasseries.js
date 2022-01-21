@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   PeliculasSeries.init({
     imagen: DataTypes.STRING,
     titulo: DataTypes.STRING,
-    fecha: DataTypes.DATE,
+    fecha: DataTypes.INTEGER,
     calificacion: DataTypes.INTEGER,
     id_genero: DataTypes.INTEGER
   }, {

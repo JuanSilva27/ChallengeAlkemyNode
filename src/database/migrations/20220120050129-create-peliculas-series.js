@@ -17,7 +17,7 @@ module.exports = {
         allowNull:false
       },
       fecha: {
-        type: Sequelize.DATE,
+        type: Sequelize.INTEGER,
         allowNull:false
       },
       calificacion: {
