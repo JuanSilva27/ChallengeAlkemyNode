@@ -1,25 +1,102 @@
-const res = require('express/lib/response')
+
 const db = require('../database/models')
+const Op= db.Sequelize.Op;
 
 module.exports = {
     list: async (req, res) => {
+        let response = (data)=>{
+            let obj=
+            {status: 200,
+            message: "ok",
+            data}
+            return obj
+        }
         try {
-            let personajes = await db.Personajes.findAll({
-                include: { all: true }
-            })
-            let data = personajes.map(personaje => {
-                let arr = {
-                    nombre: personaje.nombre,
-                    imagen: personaje.imagen
-                }
-                return arr
-            })
-            let response = {
-                status: 200,
-                message: "ok",
-                data
+            switch(true){
+                case (req.query.name!== undefined):
+                    let characterByName = await db.Personajes.findAll({
+                        where: {nombre:{[Op.like]:`%${req.query.name}%`}},
+                        include :{all:true}
+                    })
+                    
+                    res.status(201).json(response(characterByName))
+                    break
+
+                case (req.query.age!==undefined):
+                    let characterByAge = await db.Personajes.findAll({
+                        where: {edad:{[Op.eq]:req.query.age}},
+                        include :{all:true}
+                    })
+
+                    if(characterByAge.length>0){
+                        res.status(201).json(response(characterByAge))
+                    }
+                    else{
+                        res.status(404).json("no se encontro ningun personaje con esa Edad")
+                    }
+                    break
+
+                case  (req.query.movies!== undefined):
+                    let characterByMovies = await db.PeliculasSeries.findAll({
+                        include :{all:true},
+                        where: {id:{[Op.like]:`%${req.query.movies}%`}},
+                    })
+
+                    let respuesta = characterByMovies.map(e=>{
+                        let personajesMap=e.personajes.map(element=>{
+                            let arr={
+                                id:element.id,
+                                nombre: element.nombre
+                            }
+                            return arr
+                        }
+                        )
+                        let arr={
+                            id: e.id,
+                            titulo: e.titulo,
+                            personajes:personajesMap
+                        }
+                        return arr
+                    })
+                    if(characterByMovies.length>0){
+                        res.status(201).json(response(respuesta))
+                    }
+                    else{
+                        res.status(404).json("Esa pelicula no existe, intente con otro id")
+                    }
+                    break
+
+                case (req.query.weight !== undefined):
+                    let characterByWeight = await db.Personajes.findAll({
+                        include: { all: true },
+                        where: { peso: { [Op.eq]: req.query.weight } },
+                    })
+                    if(characterByWeight.length>0){
+                        res.status(201).json(response(characterByWeight))
+                    }
+                    else{
+                        res.status(404).json("no se encontro personaje con ese Peso")
+                    }
+
+                    
+                    break
+    
+
+                default:
+                    let personajes = await db.Personajes.findAll({
+                        include: { all: true }
+                    })
+                    let data = personajes.map(personaje => {
+                        let arr = {
+                            nombre: personaje.nombre,
+                            imagen: personaje.imagen
+                        }
+                        return arr
+                    })
+                    console.log(req.query)
+                    res.status(201).json(response(data))
+                    break
             }
-            res.status(201).json(response)
         }
         catch (error) {
             return res.status(400).json({
@@ -34,12 +111,12 @@ module.exports = {
             let personaje = await db.Personajes.findByPk(req.params.id, {
                 include: { all: true }
             })
-            let peliculas = personaje.peliculas.map(pelicula=>{
-                let arr={
-                    titulo:pelicula.titulo,
+            let peliculas = personaje.peliculas.map(pelicula => {
+                let arr = {
+                    titulo: pelicula.titulo,
                     imagen: pelicula.imagen,
-                    fecha:pelicula.fecha,
-                    calificacion:pelicula.calificacion
+                    fecha: pelicula.fecha,
+                    calificacion: pelicula.calificacion
                 }
                 return arr
             })
@@ -64,7 +141,7 @@ module.exports = {
         catch (err) {
             return res.status(404).json({
                 status: 404,
-                message: err + 1
+                message: "no se encontro la Personaje"
             })
         }
     },
@@ -81,7 +158,7 @@ module.exports = {
             })
             let response = {
                 status: 200,
-                message: "ok",
+                message: "Personaje Creado!",
                 data
             }
             res.status(201).json(response)
@@ -97,14 +174,22 @@ module.exports = {
 
     editById: async (req, res) => {
         try {
-            const Character = await db.Personajes.findByPk(req.params.id)
-            const UpdatedCharacter = await Character.update(req.body)
-            let response = {
-                status: 200,
-                message: "ok",
-                UpdatedCharacter
+            const character = await db.Personajes.findByPk(req.params.id)
+            if (character) {
+                const UpdatedCharacter = await character.update(req.body)
+                let response = {
+                    status: 200,
+                    message: "ok",
+                    UpdatedCharacter
+                }
+                res.status(201).json(response)
+            }else{
+                return res.status(404).json({
+                    status: 404,
+                    message: "personaje no encontrado"
+                })
             }
-            res.status(201).json(response)
+
         }
         catch (err) {
             return res.status(400).json({
@@ -117,7 +202,13 @@ module.exports = {
 
     deleteById: async (req, res) => {
         try {
+            
             await db.Personajes.destroy({
+                where: {
+                    id: req.params.id
+                }
+            })
+            await db.PersonajesPeliculas.destroy({
                 where: {
                     id: req.params.id
                 }
