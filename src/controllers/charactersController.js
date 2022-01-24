@@ -205,25 +205,26 @@ module.exports = {
     deleteById: async (req, res) => {
         try {
             
-            let cosas = await db.PersonajePelicula.findAll({ ///comprueba si el personja a eliminar esta relacionado a alguna pelicula
-                where: {
-                    id_personaje: req.params.id
-                }
-            })
-            if(cosas.length>0){ ///si esta relacionado a alguna pelicula elimina la relacion antes de eliminar al personaje
-                await db.PersonajePelicula.destroy({
-                    where: {
-                        id_personaje: req.params.id
-                    }
-                })
-            }
+            
 
             await db.Personajes.destroy({
                 where: {
                     id: req.params.id
                 }
             })
-            console.log(cosas)
+
+            let cosas = await db.PersonajePelicula.findAll({ ///comprueba si el personja a eliminar esta relacionado a alguna pelicula
+                where: {
+                    id_personaje: req.params.id
+                }
+            })
+            if(cosas.length>0){ ///si esta relacionado a alguna pelicula elimina la relacion
+                db.PersonajePelicula.destroy({
+                    where: {
+                        id_personaje: req.params.id
+                    }
+                })
+            }
             let response = {
                 status: 200,
                 message: "El Personaje fue eliminado"
@@ -233,7 +234,7 @@ module.exports = {
         catch (err) {
             return res.status(404).json({
                 status: 404,
-                message: err + "1"
+                message: "no se encontro el Personaje para eliminar"
             })
         }
     }
