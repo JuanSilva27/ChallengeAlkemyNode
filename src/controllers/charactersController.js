@@ -212,7 +212,7 @@ module.exports = {
             })
             await db.PersonajesPeliculas.destroy({
                 where: {
-                    id: req.params.id
+                    id_personaje: req.params.id
                 }
             })
             let response = {
