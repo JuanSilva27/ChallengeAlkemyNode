@@ -41,7 +41,7 @@ module.exports = {
                 case (req.query.movies !== undefined):
                     let characterByMovies = await db.PeliculasSeries.findAll({
                         include: { all: true },
-                        where: { id: { [Op.like]: `%${req.query.movies}%` } },
+                        where: { id: { [Op.eq]: req.query.movies} },
                     })
 
                     let respuesta = characterByMovies.map(e => {
@@ -204,17 +204,26 @@ module.exports = {
 
     deleteById: async (req, res) => {
         try {
+            
+            let cosas = await db.PersonajePelicula.findAll({ ///comprueba si el personja a eliminar esta relacionado a alguna pelicula
+                where: {
+                    id_personaje: req.params.id
+                }
+            })
+            if(cosas.length>0){ ///si esta relacionado a alguna pelicula elimina la relacion antes de eliminar al personaje
+                await db.PersonajePelicula.destroy({
+                    where: {
+                        id_personaje: req.params.id
+                    }
+                })
+            }
 
             await db.Personajes.destroy({
                 where: {
                     id: req.params.id
                 }
             })
-            await db.PersonajesPeliculas.destroy({
-                where: {
-                    id_personaje: req.params.id
-                }
-            })
+            console.log(cosas)
             let response = {
                 status: 200,
                 message: "El Personaje fue eliminado"
