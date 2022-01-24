@@ -5,6 +5,7 @@ module.exports = {
     list: async (req, res) => {
         try {
             let personajes = await db.Personajes.findAll({
+                include: {all:true}
             })
             let data = personajes.map(personaje => {
                 let arr = {

@@ -17,7 +17,7 @@ module.exports = {
       nombre:"Pato Donald",
       edad:80,
       peso:45,
-      historia:"El Pato Donald​ es un personaje de Disney, caracterizado como un pato blanco antropomórfico de ojos celestes, pico, piernas y pies anaranjados",
+      historia:"El Pato Donald es un personaje de Disney, caracterizado como un pato blanco antropomórfico de ojos celestes, pico, piernas y pies anaranjados",
       createdAt: new Date,
       updatedAt: new Date
     },

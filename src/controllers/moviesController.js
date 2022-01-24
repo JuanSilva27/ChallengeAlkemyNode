@@ -7,7 +7,7 @@ module.exports = {
             try {
                 let data = await db.PeliculasSeries.findAll({
                     include:[
-                        {association: "genero"}
+                        {all: true}
                     ]
                 })
                 let response={
