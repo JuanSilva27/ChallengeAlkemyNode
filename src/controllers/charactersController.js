@@ -1,67 +1,69 @@
 
 const db = require('../database/models')
-const Op= db.Sequelize.Op;
+const Op = db.Sequelize.Op;
 
 module.exports = {
     list: async (req, res) => {
-        let response = (data)=>{
-            let obj=
-            {status: 200,
-            message: "ok",
-            data}
+        let response = (data) => {
+            let obj =
+            {
+                status: 200,
+                message: "ok",
+                data
+            }
             return obj
         }
         try {
-            switch(true){
-                case (req.query.name!== undefined):
+            switch (true) {
+                case (req.query.name !== undefined):
                     let characterByName = await db.Personajes.findAll({
-                        where: {nombre:{[Op.like]:`%${req.query.name}%`}},
-                        include :{all:true}
+                        where: { nombre: { [Op.like]: `%${req.query.name}%` } },
+                        include: { all: true }
                     })
-                    
+
                     res.status(201).json(response(characterByName))
                     break
 
-                case (req.query.age!==undefined):
+                case (req.query.age !== undefined):
                     let characterByAge = await db.Personajes.findAll({
-                        where: {edad:{[Op.eq]:req.query.age}},
-                        include :{all:true}
+                        where: { edad: { [Op.eq]: req.query.age } },
+                        include: { all: true }
                     })
 
-                    if(characterByAge.length>0){
+                    if (characterByAge.length > 0) {
                         res.status(201).json(response(characterByAge))
                     }
-                    else{
+                    else {
                         res.status(404).json("no se encontro ningun personaje con esa Edad")
                     }
                     break
 
-                case  (req.query.movies!== undefined):
+                case (req.query.movies !== undefined):
                     let characterByMovies = await db.PeliculasSeries.findAll({
-                        include :{all:true},
-                        where: {id:{[Op.like]:`%${req.query.movies}%`}},
+                        include: { all: true },
+                        where: { id: { [Op.like]: `%${req.query.movies}%` } },
                     })
 
-                    let respuesta = characterByMovies.map(e=>{
-                        let personajesMap=e.personajes.map(element=>{
-                            let arr={
-                                id:element.id,
+                    let respuesta = characterByMovies.map(e => {
+                        let personajesMap = e.personajes.map(element => {
+                            let arr = {
+                                id: element.id,
                                 nombre: element.nombre
                             }
                             return arr
                         }
                         )
-                        let arr={
+                        let arr = {
                             id: e.id,
                             titulo: e.titulo,
-                            personajes:personajesMap
+                            personajes: personajesMap
                         }
                         return arr
                     })
-                    if(characterByMovies.length>0){
+                    if (characterByMovies.length > 0) {
                         res.status(201).json(response(respuesta))
                     }
-                    else{
+                    else {
                         res.status(404).json("Esa pelicula no existe, intente con otro id")
                     }
                     break
@@ -71,16 +73,16 @@ module.exports = {
                         include: { all: true },
                         where: { peso: { [Op.eq]: req.query.weight } },
                     })
-                    if(characterByWeight.length>0){
+                    if (characterByWeight.length > 0) {
                         res.status(201).json(response(characterByWeight))
                     }
-                    else{
+                    else {
                         res.status(404).json("no se encontro personaje con ese Peso")
                     }
 
-                    
+
                     break
-    
+
 
                 default:
                     let personajes = await db.Personajes.findAll({
@@ -183,7 +185,7 @@ module.exports = {
                     UpdatedCharacter
                 }
                 res.status(201).json(response)
-            }else{
+            } else {
                 return res.status(404).json({
                     status: 404,
                     message: "personaje no encontrado"
@@ -202,7 +204,7 @@ module.exports = {
 
     deleteById: async (req, res) => {
         try {
-            
+
             await db.Personajes.destroy({
                 where: {
                     id: req.params.id
