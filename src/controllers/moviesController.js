@@ -1,4 +1,5 @@
 const db = require('../database/models')
+const { create } = require('./charactersController')
 
 
 module.exports = {
@@ -68,6 +69,36 @@ module.exports = {
             return res.status(400).json({
                 status: 400,
                 message: err + "1"
+            })
+        }
+    },
+
+    create: async(req, res)=>{
+        
+        try{
+            let { imagen, titulo, fecha, calificacion, id_genero } = req.body
+            if(id_genero<6 && id_genero>0){
+                let data= await db.PeliculasSeries.create({
+                    imagen:imagen,
+                    titulo:titulo,
+                    fecha:fecha,
+                    calificacion:calificacion,
+                    id_genero:id_genero
+                })
+                let response = {
+                    status: 200,
+                    message: "Personaje Creado!",
+                    data
+                }
+                res.status(201).json(response)
+            }else{
+                res.status(400).json("el id_genero no corresponde a un genero existente en la DB")
+            }
+        }
+        catch (err){
+            res.status(400).json({
+                status: 400,
+                message: "el Formato de creacion de Personaje debe ser image: string, titulo:string, fecha: integer, calificacion: integer, id_genero: string (del 1 al 5)"
             })
         }
     }
