@@ -1,31 +1,76 @@
 const db = require('../database/models')
-const { create } = require('./charactersController')
+const Op = db.Sequelize.Op;
 
 
 module.exports = {
     list: async (req, res) => {
-
-        try {
-            let peliculas = await db.PeliculasSeries.findAll({
-                include: [
-                    { all: true }
-                ]
-            })
-
-            let data = peliculas.map(pelicula => {
-                let arr = {
-                    imagen: pelicula.imagen,
-                    titulo: pelicula.titulo,
-                    fecha: pelicula.fecha,
-                }
-                return arr
-            })
-            let response = {
+        let response = (data) => {
+            let obj =
+            {
                 status: 200,
                 message: "ok",
                 data
             }
-            res.status(201).json(response)
+            return obj
+        }
+
+        try {
+            switch (true) {
+                case (req.query.name !== undefined):
+                    if (req.query.order !== undefined && req.query.order === "DESC") {
+                        let movieByName = await db.PeliculasSeries.findAll({
+                            where: { titulo: { [Op.like]: `%${req.query.name}%` } },
+                            include: { all: true },
+                            order: [["fecha", "DESC"]]
+                        })
+                        res.status(201).json(response(movieByName))
+                    } else {
+                        let movieByName = await db.PeliculasSeries.findAll({
+                            where: { titulo: { [Op.like]: `%${req.query.name}%` } },
+                            include: { all: true },
+                            order: [["fecha", "ASC"]]
+                        })
+                        res.status(201).json(response(movieByName))
+                    }
+                    break
+
+                case (req.query.genre !== undefined):
+                    if (req.query.order !== undefined && req.query.order === "DESC") {
+                        let movieByGenre = await db.PeliculasSeries.findAll({
+                            where: { id_genero: { [Op.eq]: req.query.genre } },
+                            include: { all: true },
+                            order: [["fecha", "DESC"]]
+                        })
+                        res.status(201).json(response(movieByGenre))
+                    } else {
+                        let movieByGenre = await db.PeliculasSeries.findAll({
+                            where: { id_genero: { [Op.eq]: req.query.genre } },
+                            include: { all: true },
+                            order: [["fecha", "ASC"]]
+                        })
+                        res.status(201).json(response(movieByGenre))
+                    }
+
+                    break
+                default:
+                    let peliculas = await db.PeliculasSeries.findAll({
+                        include: [
+                            { all: true }
+                        ],
+                        order: [["fecha"]]
+                    })
+
+                    let data = peliculas.map(pelicula => {
+                        let arr = {
+                            imagen: pelicula.imagen,
+                            titulo: pelicula.titulo,
+                            fecha: pelicula.fecha,
+                        }
+                        return arr
+                    })
+                    res.status(201).json(response(data))
+                    break
+            }
         }
         catch (error) {
             return res.status(400).json({
