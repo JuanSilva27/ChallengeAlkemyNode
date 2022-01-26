@@ -13,6 +13,6 @@ app.listen(3001,()=>{
 
 app.use(express.json())
 
-app.use("/",login)
+app.use("/auth",login)
 app.use("/movies",movies)
 app.use("/characters",characters)
